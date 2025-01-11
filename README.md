@@ -1,27 +1,50 @@
-# React example of minikit
+# React + TypeScript + Vite
 
-Apart from a frontend, you'll need a backend, this template contains an example of that as well
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## To run, install:
+Currently, two official plugins are available:
 
-- deps, `cd frontend;pnpm i;cd -;cd backend;pnpm i`
-- ngrok - Create a free ngrok account, follow the official [docs](https://ngrok.com/docs/getting-started/)
-- nginx - use you favorite package manager :)
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-### nginx setup
+## Expanding the ESLint configuration
 
-To serve multiple localhost applications through a single ngrok tunnel (only one available for free-tier users), you can use nginx as a reverse proxy. Follow the steps below to set it up:
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-### Run nginx
+- Configure the top-level `parserOptions` property like this:
 
-Use the config provided in the root of this repo
-`sudo nginx -c full/path/to/this/repo/nginx.conf`
-or, if you run the command from the root dir
-`sudo nginx -c $(pwd)/nginx.conf`
+```js
+export default tseslint.config({
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
+```
 
-To stop nginx run `sudo nginx -s stop`
+- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
+- Optionally add `...tseslint.configs.stylisticTypeChecked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-### Tunnel through Ngrok
+```js
+// eslint.config.js
+import react from 'eslint-plugin-react'
 
-`ngrok http 8080`
-The port doesn't matter, make sure it's the `listen` one from nginx config
+export default tseslint.config({
+  // Set the react version
+  settings: { react: { version: '18.3' } },
+  plugins: {
+    // Add the react plugin
+    react,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended rules
+    ...react.configs.recommended.rules,
+    ...react.configs['jsx-runtime'].rules,
+  },
+})
+```
